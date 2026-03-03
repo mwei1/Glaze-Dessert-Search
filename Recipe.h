@@ -4,10 +4,13 @@
 
 #ifndef GLAZE_PROJECT_2_RECIPE_H
 #define GLAZE_PROJECT_2_RECIPE_H
+#include <string>
 
-
-class Recipe {
+struct Recipe {
+    std::string name;
+    int prepTime = 0;
+    std::string difficulty;
+    std::string mainIngredient;
 };
-
 
 #endif //GLAZE_PROJECT_2_RECIPE_H

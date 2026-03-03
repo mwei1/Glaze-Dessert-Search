@@ -4,9 +4,47 @@
 
 #ifndef GLAZE_PROJECT_2_CSVREADER_H
 #define GLAZE_PROJECT_2_CSVREADER_H
-
+#include <string>
+#include <vector>
+#include "Recipe.h"
+#include <fstream>
+#include <sstream>
+#include <stdexcept>
 
 class CSVReader {
+public:
+    static std::vector<Recipe> loadRecipesFromFile(const std::string& fileName) {
+        std::ifstream file(fileName);
+        if (!file.is_open()) {
+            throw std::runtime_error("File could not be opened.");
+        }
+        std::vector<Recipe> recipes;
+        std::string line;
+        if (!std::getline(file, line)) {
+            return recipes;
+        }
+        while (std::getline(file, line)) {
+            if (line.empty()) {
+                continue;
+            }
+            std::stringstream ss(line);
+            std::string name, prepTimestr, difficulty, mainIngredient;
+            if (std::getline(ss, name, ',') && std::getline(ss, prepTimestr, ',') && std::getline(ss, difficulty, ',')) {
+                std::getline(ss, mainIngredient);
+                //must remove the trailing whitespace at the end of each line
+                if (!mainIngredient.empty() && mainIngredient.back()=='\r') {
+                    mainIngredient.pop_back();
+                }
+                Recipe recipe;
+                recipe.name = name;
+                recipe.prepTime = std::stoi(prepTimestr);
+                recipe.difficulty = difficulty;
+                recipe.mainIngredient = mainIngredient;
+                recipes.push_back(recipe);
+            }
+        }
+        return recipes;
+    }
 };
 
 
