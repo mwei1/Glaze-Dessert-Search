@@ -4,6 +4,7 @@
 #include <iostream>
 #include <optional>
 #include <chrono>
+#include <random>
 #include <SFML/Graphics.hpp>
 #include <SFML/Audio.hpp>
 
@@ -28,7 +29,7 @@ void musicSwitch(sf::Music& music, sf::Sprite& spr, sf::Texture& mute, sf::Textu
     }
 }
 
-//toggles buttons and text for structure switching
+//toggles text for structure switching
 void structureSwitch(bool usingTrie, sf::Text& top, sf::Text& bot, sf::FloatRect sizeRect)
 {
     if (usingTrie)
@@ -58,6 +59,12 @@ void structureSwitch(bool usingTrie, sf::Text& top, sf::Text& bot, sf::FloatRect
 }
 
 int main() {
+    //random number generator
+    random_device rd;
+    mt19937 rng(rd());
+    uniform_real_distribution<float> unif(0.0, 1.0);
+    uniform_int_distribution<int> random_index(0, 999999);
+
     //colors
     sf::Color backgroundColor(245, 228, 218);
     sf::Color titleColor(254, 136, 150);
@@ -167,6 +174,18 @@ int main() {
     bar.setOutlineColor(accent);
     bar.setOutlineThickness(1.f);
 
+    //search button
+    //https://www.flaticon.com/free-icon/search-interface-symbol_54481?term=search&page=1&position=2&origin=search&related_id=54481
+    sf::Texture search;
+    search.loadFromFile("resources/images/search.png");
+    sf::Sprite searchIcon(search);
+    searchIcon.setScale(sf::Vector2f(0.065, 0.065));
+    sizeRect = searchIcon.getLocalBounds();
+    searchIcon.setOrigin(sizeRect.getCenter());
+    searchIcon.setPosition({880, 200});
+
+
+
     bool usingTrie = true;
 
     //load recipes from csv
@@ -177,8 +196,6 @@ int main() {
     for (int i=0;i<recipes.size();i++) {
         t.insert(recipes[i].name, i);
     }
-
-
 
 
     while (window.isOpen())
@@ -196,11 +213,16 @@ int main() {
         else
             structureButton.setScale(sf::Vector2f(1, 1));
 
+        if (searchIcon.getGlobalBounds().contains(mousePos))
+            searchIcon.setScale(sf::Vector2f(0.06, 0.06));
+        else
+            searchIcon.setScale(sf::Vector2f(.065, .065));
+
         //donut rotation
         if (quirkyDonut.getGlobalBounds().contains(mousePos))
         {
             quirkyDonut.setScale(sf::Vector2f(0.085, 0.085));
-            quirkyDonut.rotate(sf::degrees(0.1));
+            quirkyDonut.rotate(sf::degrees(unif(rng) / 3.0f));
         }
         else
             quirkyDonut.setScale(sf::Vector2f(0.089, 0.089));
@@ -234,6 +256,11 @@ int main() {
                 //highlight search bar
                 if (bar.getGlobalBounds().contains(mousePos))
                     searching = true;
+
+                if (searchIcon.getGlobalBounds().contains(mousePos))
+                {
+                    //search
+                }
             }
 
             //treat any typing as search
@@ -285,6 +312,7 @@ int main() {
             bar.setOutlineThickness(1.f);
         window.draw(bar);
         window.draw(searchBar);
+        window.draw(searchIcon);
 
         window.display();
     }
