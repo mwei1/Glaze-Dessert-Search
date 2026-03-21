@@ -41,6 +41,7 @@ int main() {
     window.clear(backgroundColor);
 
     //load window icon
+    //https://png.pngtree.com/png-clipart/20190906/original/pngtree-cake-dessert-pixel-painting-illustration-png-image_4558418.jpg
     sf::Image icon;
     icon.loadFromFile("resources/images/taskbar_icon.png");
     window.setIcon(icon.getSize(), icon.getPixelsPtr());
@@ -52,9 +53,10 @@ int main() {
     //music.play();
 
     //music mute button
+    //https://thenounproject.com/icon/loud-speaker-3452892/
     sf::Texture unmuted;
     unmuted.loadFromFile("resources/images/unmute.png");
-
+    //https://thenounproject.com/icon/mute-1683888/
     sf::Texture muted;
     muted.loadFromFile("resources/images/mute.png");
 
@@ -63,6 +65,7 @@ int main() {
     toggleMusic.setPosition({0.f, 750.f});
 
     //beautiful donut
+    //https://pngtree.com/freepng/funny-donut-with-colorful-icing-cartoon-eyes-expressive-face-hand-and-foot-on-transparent-background_23206177.html
     sf::Texture donut;
     donut.loadFromFile("resources/images/quirky_donut.png");
     sf::Sprite quirkyDonut(donut);
@@ -72,8 +75,11 @@ int main() {
     quirkyDonut.setPosition({0.f + quirkyDonut.getGlobalBounds().size.x / 2.0f, 130.f + quirkyDonut.getGlobalBounds().size.y / 2.0f});
 
     //load fonts
+    //https://www.dafont.com/butter-garlic.font
     const sf::Font title("resources/fonts/ButterGarlic.ttf");
+    //https://www.dafont.com/es/million-dreams.font
     const sf::Font subtitle("resources/fonts/Million Dreams.otf");
+    //https://fonts.google.com/specimen/Martel
     const sf::Font text("resources/fonts/Martel-Light.ttf");
 
     //title
@@ -166,6 +172,7 @@ int main() {
             }
 
             //treat any typing as search
+            //stores as unicode, using https://symbl.cc/en/unicode-table/ as reference
             if (auto* textEvent = event->getIf<sf::Event::TextEntered>())
             {
                 searching = true;
