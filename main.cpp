@@ -31,8 +31,9 @@ int main() {
     sf::Color backgroundColor(245, 228, 218);
     sf::Color titleColor(254, 136, 150);
     sf::Color subtitleColor(254, 147, 152);
+    sf::Color accent(211, 101, 130);
 
-    sf::FloatRect textRect;
+    sf::FloatRect sizeRect; //for text resizing/centering
 
     sf::RenderWindow window(sf::VideoMode({1200, 800}), "Dessert Search");
     window.clear(backgroundColor);
@@ -59,30 +60,48 @@ int main() {
     toggleMusic.setScale(sf::Vector2f(0.2, 0.2));
     toggleMusic.setPosition({0.f, 750.f});
 
+    //beautiful donut
+    sf::Texture donut;
+    donut.loadFromFile("resources/images/quirky_donut.png");
+    sf::Sprite quirkyDonut(donut);
+    quirkyDonut.setScale(sf::Vector2f(0.09, 0.09));
+    sizeRect = quirkyDonut.getLocalBounds();
+    quirkyDonut.setOrigin(sizeRect.getCenter());
+    quirkyDonut.setPosition({0.f + quirkyDonut.getGlobalBounds().size.x / 2.0f, 130.f + quirkyDonut.getGlobalBounds().size.y / 2.0f});
+
     //load fonts
     const sf::Font title("resources/fonts/ButterGarlic.ttf");
     const sf::Font subtitle("resources/fonts/Million Dreams.otf");
     const sf::Font text("resources/fonts/Martel-Light.ttf");
 
-    sf::Text text1(title);
-    text1.setString("Welcome to Dessert Searcher!");
-    text1.setCharacterSize(60);
+    //title
+    sf::Text text1(title,"Welcome to Dessert Searcher!", 60);
     text1.setFillColor(titleColor);
-    textRect = text1.getLocalBounds();
-    text1.setOrigin({textRect.getCenter()});
+    text1.setOutlineThickness(2);
+    text1.setOutlineColor(accent);
+    sizeRect = text1.getLocalBounds();
+    text1.setOrigin({sizeRect.getCenter()});
     text1.setPosition({600, 75});
 
-    sf::Text text2(subtitle);
-    text2.setString("Search for a Dessert Below");
-    text2.setCharacterSize(40);
+    //subtitle
+    sf::Text text2(subtitle, "Search for a Dessert Below", 40);
     text2.setFillColor(subtitleColor);
-    textRect = text2.getLocalBounds();
-    text2.setOrigin({textRect.getCenter()});
+    sizeRect = text2.getLocalBounds();
+    text2.setOrigin({sizeRect.getCenter()});
     text2.setPosition({600, 140});
 
+    //search box
+    string query = "";
+    sf::Text searchBar(text, "WELCOME HELP ME", 30);
+    searchBar.setFillColor(sf::Color::Black);
+    sizeRect = searchBar.getLocalBounds();
+    searchBar.setOrigin({sizeRect.getCenter()});
+    searchBar.setPosition({600, 200});
 
-
-
+    sf::RectangleShape bar({600.f, 40.f});
+    bar.setOrigin({300.f, 20.f});
+    bar.setPosition({600, 200});
+    bar.setOutlineThickness(2.f);
 
 
     vector<Recipe> recipes = CSVReader::loadRecipesFromFile("resources/recipes.csv");
@@ -94,28 +113,6 @@ int main() {
     }
 
 
-    /*cout << "\n\n";
-    string testSearchName = "Balsamic Bombe";
-    vector<int> testFoundIndex = t.search(testSearchName);
-    if (!testFoundIndex.empty()) {
-        for (int index : testFoundIndex) {
-            std::cout << recipes[index].name << " " << recipes[index].prepTime << " " << recipes[index].difficulty << " " << recipes[index].mainIngredient << " " << recipes[index].allergens << "\n";
-        }
-    }else {
-        std::cout << "Recipe not found.";
-    }
-
-    cout << endl;
-
-    string testPrefix = "Bal";
-    vector<int> testFoundPrefix = t.searchByPrefix(testPrefix);
-    if (!testFoundPrefix.empty()) {
-        for (int index : testFoundPrefix) {
-            cout << recipes[index].name << " " << recipes[index].prepTime << " " << recipes[index].difficulty << " " << recipes[index].mainIngredient << " " << recipes[index].allergens << "\n";
-        }
-    }else {
-        cout << "No recipes found associated with that index.";
-    }*/
 
 
     while (window.isOpen())
@@ -126,6 +123,15 @@ int main() {
             toggleMusic.setScale(sf::Vector2f(0.18, 0.18));
         else
             toggleMusic.setScale(sf::Vector2f(0.2, 0.2));
+
+        if (quirkyDonut.getGlobalBounds().contains(mousePos))
+        {
+            quirkyDonut.setScale(sf::Vector2f(0.085, 0.085));
+            quirkyDonut.rotate(sf::degrees(0.1));
+        }
+        else
+            quirkyDonut.setScale(sf::Vector2f(0.089, 0.089));
+
 
         while (const std::optional event = window.pollEvent())
         {
@@ -142,8 +148,13 @@ int main() {
         window.clear(backgroundColor);
 
         window.draw(toggleMusic);
+        window.draw(quirkyDonut);
+
         window.draw(text1);
         window.draw(text2);
+
+        window.draw(bar);
+        window.draw(searchBar);
 
         window.display();
     }
