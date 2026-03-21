@@ -92,9 +92,9 @@ float searchTrie(Trie& t, const bool prefixSearch, const string query, vector<Re
         indices = t.search(query);
     auto t2 = chrono::steady_clock::now();
     float duration = chrono::duration_cast<chrono::milliseconds>(t2 - t1).count();
+    result.clear();
     result = indicesToRecipes(recipes, indices);
     return duration;
-
 }
 //fills text and rectangles vector with COLORLESS text and rectangles corresponding to recipes
 void recipesToText(vector<Recipe>& recipes, vector<sf::Text>& text, vector<sf::RectangleShape>& rectangles, const sf::Font& font)
@@ -245,7 +245,7 @@ int main() {
     resultsBar.setPosition({600, 240});
 
     //result bar default text
-    sf::Text defaultResult(text, "No Results Yet!", 25);
+    sf::Text defaultResult(text, "No Results Yet! Try Searching Something!", 25);
     defaultResult.setFillColor(accent);
     sizeRect = defaultResult.getLocalBounds();
     defaultResult.setOrigin({sizeRect.getCenter()});
@@ -369,6 +369,20 @@ int main() {
         else
             quirkyDonut.setScale(sf::Vector2f(0.089, 0.089));
 
+        for (int i = 0; i < min(static_cast<int>(resultText.size()), 15); i++)
+        {
+            if (resultRect[i].getGlobalBounds().contains(mousePos))
+            {
+                resultRect[i].setScale(sf::Vector2f(0.95, 0.95));
+                resultText[i].setScale(sf::Vector2f(0.95, 0.95));
+            }
+            else
+            {
+                resultRect[i].setScale(sf::Vector2f(1, 1));
+                resultText[i].setScale(sf::Vector2f(1, 1));
+            }
+        }
+
 
         while (const std::optional event = window.pollEvent())
         {
@@ -421,6 +435,13 @@ int main() {
                         //search with Hash Map
                     }
                 }
+                for (int i = 0; i < min(static_cast<int>(resultText.size()), 15); i++)
+                {
+                    if (resultRect[i].getGlobalBounds().contains(mousePos))
+                    {
+                        Recipe temp = currentResults[i];
+                    }
+                }
             }
 
             //treat any typing as search
@@ -452,6 +473,7 @@ int main() {
                 }
                 else
                     query+=textEvent->unicode;
+
                 searchBar.setString(query);
                 sizeRect = searchBar.getLocalBounds();
                 //cut off front part of oversized strings
@@ -493,11 +515,12 @@ int main() {
         window.draw(structureText2);
 
         //search bar + results
-        if (query.empty() || !prefixSearch)
+        if (query.empty())
         {
             window.draw(resultsBar);
             window.draw(defaultResult);
             resultText.clear();
+            resultRect.clear();
         }
 
         if (!resultText.empty())
