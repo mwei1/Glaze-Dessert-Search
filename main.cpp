@@ -103,9 +103,9 @@ void recipesToText(vector<Recipe>& recipes, vector<sf::Text>& text, vector<sf::R
     rectangles.clear();
     for (int i = 0; i < recipes.size(); i++)
     {
-        sf::RectangleShape tempRect({560, 35});
+        sf::RectangleShape tempRect({580, 35});
         tempRect.setOutlineThickness(1);
-        tempRect.setOrigin({280, 17.5});
+        tempRect.setOrigin({290, 17.5});
         tempRect.setPosition({600, 241.f + 35.f * i});
         rectangles.push_back(tempRect);
 
@@ -120,6 +120,29 @@ void recipesToText(vector<Recipe>& recipes, vector<sf::Text>& text, vector<sf::R
         tempText.setPosition(tempRect.getPosition());
         text.push_back(tempText);
     }
+}
+
+vector<string> splitIntoThree(string input, sf::Font font)
+{
+    vector<string> result;
+
+    string str = input;
+    sf::Text text(font, str, 28);
+    sf::FloatRect sizeRect = text.getLocalBounds();
+    string temp;
+    while (sizeRect.size.x > 244.0f)
+    {
+        temp = str[str.size() - 1] + temp;
+        temp.pop_back();
+        text.setString(str);
+        sizeRect = text.getLocalBounds();
+    }
+    auto index = temp.find(' ');
+    //one word
+    if (index == string::npos)
+        return {input};
+    //
+    result.push_back(str);
 }
 
 int main() {
@@ -237,11 +260,11 @@ int main() {
     bar.setOutlineThickness(1.f);
 
     //result bar outline
-    sf::RectangleShape resultsBar({560, 35});
+    sf::RectangleShape resultsBar({580, 35});
     resultsBar.setFillColor(backgroundColor);
     resultsBar.setOutlineThickness(1);
     resultsBar.setOutlineColor(accent);
-    resultsBar.setOrigin({280, 17.5});
+    resultsBar.setOrigin({290, 17.5});
     resultsBar.setPosition({600, 240});
 
     //result bar default text
@@ -614,6 +637,13 @@ int main() {
             for (int i = 0; i < min(static_cast<int>(resultText.size()), 15); i++)
             {
                 resultText[i].setFillColor(accent);
+                sizeRect = resultText[i].getLocalBounds();
+                while (sizeRect.size.x > 575.0f)
+                {
+                    resultText[i].setLetterSpacing(resultText[i].getLetterSpacing() - 0.01);
+                    sizeRect = resultText[i].getLocalBounds();
+                }
+                resultText[i].setOrigin(sizeRect.getCenter());
                 resultRect[i].setFillColor(backgroundColor);
                 resultRect[i].setOutlineColor(accent);
                 window.draw(resultRect[i]);
