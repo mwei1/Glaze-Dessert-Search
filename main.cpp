@@ -82,16 +82,19 @@ vector<Recipe> indexToRecipe(vector<Recipe>& recipes, int index)
 }
 
 //searches Trie for given query using either prefix or fulltext search
-void searchTrie(Trie& t, const bool prefixSearch, const string query, vector<Recipe>& result, vector<Recipe>& recipes)
+float searchTrie(Trie& t, const bool prefixSearch, const string query, vector<Recipe>& result, vector<Recipe>& recipes)
 {
+    auto t1 = chrono::steady_clock::now();
     vector<int> indices;
     if (prefixSearch)
         indices = t.searchByPrefix(query);
     else
         indices = t.search(query);
-    for (int i: indices)
-        cout << i << " ";
+    auto t2 = chrono::steady_clock::now();
+    float duration = chrono::duration_cast<chrono::milliseconds>(t2 - t1).count();
     result = indicesToRecipes(recipes, indices);
+    return duration;
+
 }
 //fills text and rectangles vector with COLORLESS text and rectangles corresponding to recipes
 void recipesToText(vector<Recipe>& recipes, vector<sf::Text>& text, vector<sf::RectangleShape>& rectangles, const sf::Font& font)
@@ -242,7 +245,7 @@ int main() {
     resultsBar.setPosition({600, 240});
 
     //result bar default text
-    sf::Text defaultResult(text, "No Results Yet! Try Searching Something!", 25);
+    sf::Text defaultResult(text, "No Results Yet!", 25);
     defaultResult.setFillColor(accent);
     sizeRect = defaultResult.getLocalBounds();
     defaultResult.setOrigin({sizeRect.getCenter()});
@@ -259,9 +262,6 @@ int main() {
     searchIcon.setPosition({880, 200});
 
     //performance indicators
-    float trieTime = 0.0;
-    float mapTime = 0.0;
-
     sf::RectangleShape performanceBox({180.f, 120.0f});
     performanceBox.setOutlineThickness(2);
     performanceBox.setFillColor(backgroundColor);
@@ -269,14 +269,14 @@ int main() {
     performanceBox.setOrigin({90, 0});
     performanceBox.setPosition({1090, 185});
 
-    sf::Text triePerformance(text, "Last Trie Time:\n   " + to_string(trieTime), 23);
+    sf::Text triePerformance(text, "Last Trie Time:\n " + to_string(0.0f) + " ms", 23);
     triePerformance.setFillColor(accent);
     triePerformance.setLineSpacing(0.7);
     sizeRect = triePerformance.getLocalBounds();
     triePerformance.setOrigin({sizeRect.getCenter().x, 0});
     triePerformance.setPosition({1090, 187});
 
-    sf::Text mapPerformance(text, "Last Map Time:\n   " + to_string(mapTime), 23);
+    sf::Text mapPerformance(text, "Last Map Time:\n " + to_string(0.0f) + " ms", 23);
     mapPerformance.setFillColor(accent);
     mapPerformance.setLineSpacing(0.7);
     sizeRect = mapPerformance.getLocalBounds();
@@ -315,6 +315,8 @@ int main() {
     name.setPosition({600, 795});
 
 
+    float trieTime = 0.0;
+    float mapTime = 0.0;
 
     bool usingTrie = true;
     bool prefixSearch = false;
@@ -335,6 +337,7 @@ int main() {
     while (window.isOpen())
     {
         sf::Vector2f mousePos = window.mapPixelToCoords(sf::Mouse::getPosition(window));
+        bool changed = false;
 
         //button grow/shrink
         if (toggleMusic.getGlobalBounds().contains(mousePos))
@@ -406,9 +409,11 @@ int main() {
                 if (searchIcon.getGlobalBounds().contains(mousePos))
                 {
                     searching = true;
+                    if (query.empty())
+                        continue;
                     if (usingTrie)
                     {
-                        searchTrie(t, prefixSearch, query, currentResults, recipes);
+                        trieTime = searchTrie(t, prefixSearch, query, currentResults, recipes);
                         recipesToText(currentResults, resultText, resultRect, text);
                     }
                     else
@@ -433,9 +438,11 @@ int main() {
                 //enter runs search
                 else if (textEvent->unicode == 13 || textEvent->unicode == 10)
                 {
+                    if (query.empty())
+                        continue;
                     if (usingTrie)
                     {
-                        searchTrie(t, prefixSearch, query, currentResults, recipes);
+                        trieTime = searchTrie(t, prefixSearch, query, currentResults, recipes);
                         recipesToText(currentResults, resultText, resultRect, text);
                     }
                     else
@@ -459,6 +466,13 @@ int main() {
                 }
                 searchBar.setOrigin({0, 18});
                 searchBar.setPosition({305, 200});
+
+                if (usingTrie && prefixSearch && !query.empty())
+                {
+                    trieTime = searchTrie(t, prefixSearch, query, currentResults, recipes);
+                    recipesToText(currentResults, resultText, resultRect, text);
+                }
+
             }
         }
 
@@ -483,11 +497,12 @@ int main() {
         {
             window.draw(resultsBar);
             window.draw(defaultResult);
+            resultText.clear();
         }
 
         if (!resultText.empty())
         {
-            for (int i = 0; i < 15; i++)
+            for (int i = 0; i < min(static_cast<int>(resultText.size()), 15); i++)
             {
                 resultText[i].setFillColor(accent);
                 resultRect[i].setFillColor(backgroundColor);
@@ -507,7 +522,9 @@ int main() {
 
         //performance indicators
         window.draw(performanceBox);
+        triePerformance.setString("Last Trie Time:\n" + to_string(trieTime) + " ms");
         window.draw(triePerformance);
+        mapPerformance.setString("Last Map Time:\n" + to_string(mapTime) + " ms");
         window.draw(mapPerformance);
 
         //fun things
