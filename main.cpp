@@ -30,7 +30,7 @@ void musicSwitch(sf::Music& music, sf::Sprite& spr, sf::Texture& mute, sf::Textu
 }
 
 //toggles text for structure switching
-void structureSwitch(bool usingTrie, sf::Text& top, sf::Text& bot, sf::FloatRect sizeRect)
+void structureSwitch(const bool usingTrie, sf::Text& top, sf::Text& bot, sf::FloatRect sizeRect)
 {
     if (usingTrie)
     {
@@ -59,12 +59,57 @@ void structureSwitch(bool usingTrie, sf::Text& top, sf::Text& bot, sf::FloatRect
 }
 
 //toggles checkbox for trie prefix search
-void checkboxSwitch(bool prefixSearch, sf::Sprite& spr, sf::Texture& checked, sf::Texture& unchecked)
+void checkboxSwitch(const bool prefixSearch, sf::Sprite& spr, sf::Texture& checked, sf::Texture& unchecked)
 {
     if (prefixSearch)
         spr.setTexture(checked);
     else
         spr.setTexture(unchecked);
+}
+
+//searches Trie for given query using either prefix or fulltext search
+void searchTrie(Trie& t, const bool prefixSearch, const string query, vector<int>& indices)
+{
+    indices.clear();
+    if (prefixSearch)
+        indices = t.searchByPrefix(query);
+    else
+        indices = t.search(query);
+}
+
+//returns vector of Recipe objects from vector of recipe indices
+vector<Recipe> indicesToRecipes(vector<Recipe>& recipes, vector<int>& indices)
+{
+    vector<Recipe> result;
+    for (int i: indices)
+        result.push_back(recipes[i]);
+    return result;
+}
+//returns vector of Recipe object from singular index
+vector<Recipe> indexToRecipe(vector<Recipe>& recipes, int index)
+{
+    return {recipes[index]};
+}
+
+//fills text and rectangles vector with COLORLESS text and rectangles corresponding to recipes
+void recipesToText(vector<Recipe>& recipes, vector<sf::Text>& text, vector<sf::RectangleShape>& rectangles, sf::Font& font)
+{
+    text.clear();
+    rectangles.clear();
+    for (int i = 0; i < recipes.size(); i++)
+    {
+        sf::RectangleShape tempRect({560, 35});
+        tempRect.setOutlineThickness(1);
+        tempRect.setOrigin({280, 17.5});
+        tempRect.setPosition({600, 241.f + 35.f * i});
+        rectangles.push_back(tempRect);
+
+        sf::Text tempText(font, recipes[i].name, 25);
+        sf::FloatRect temp = tempText.getLocalBounds();
+        tempText.setOrigin(temp.getCenter());
+        tempText.setPosition(tempRect.getPosition());
+        text.push_back(tempText);
+    }
 }
 
 int main() {
@@ -266,6 +311,7 @@ int main() {
 
     bool usingTrie = true;
     bool prefixSearch = false;
+
     vector<Recipe> currentResults;
 
     //load recipes from csv
