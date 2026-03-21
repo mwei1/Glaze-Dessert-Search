@@ -67,16 +67,6 @@ void checkboxSwitch(const bool prefixSearch, sf::Sprite& spr, sf::Texture& check
         spr.setTexture(unchecked);
 }
 
-//searches Trie for given query using either prefix or fulltext search
-void searchTrie(Trie& t, const bool prefixSearch, const string query, vector<int>& indices)
-{
-    indices.clear();
-    if (prefixSearch)
-        indices = t.searchByPrefix(query);
-    else
-        indices = t.search(query);
-}
-
 //returns vector of Recipe objects from vector of recipe indices
 vector<Recipe> indicesToRecipes(vector<Recipe>& recipes, vector<int>& indices)
 {
@@ -91,8 +81,20 @@ vector<Recipe> indexToRecipe(vector<Recipe>& recipes, int index)
     return {recipes[index]};
 }
 
+//searches Trie for given query using either prefix or fulltext search
+void searchTrie(Trie& t, const bool prefixSearch, const string query, vector<Recipe>& result, vector<Recipe>& recipes)
+{
+    vector<int> indices;
+    if (prefixSearch)
+        indices = t.searchByPrefix(query);
+    else
+        indices = t.search(query);
+    for (int i: indices)
+        cout << i << " ";
+    result = indicesToRecipes(recipes, indices);
+}
 //fills text and rectangles vector with COLORLESS text and rectangles corresponding to recipes
-void recipesToText(vector<Recipe>& recipes, vector<sf::Text>& text, vector<sf::RectangleShape>& rectangles, sf::Font& font)
+void recipesToText(vector<Recipe>& recipes, vector<sf::Text>& text, vector<sf::RectangleShape>& rectangles, const sf::Font& font)
 {
     text.clear();
     rectangles.clear();
@@ -106,6 +108,11 @@ void recipesToText(vector<Recipe>& recipes, vector<sf::Text>& text, vector<sf::R
 
         sf::Text tempText(font, recipes[i].name, 25);
         sf::FloatRect temp = tempText.getLocalBounds();
+        if (temp.size.x > 550.f)
+        {
+            float scaleFactor = 550.f/temp.size.x;
+            tempText.setScale({scaleFactor, 1.0f});
+        }
         tempText.setOrigin(temp.getCenter());
         tempText.setPosition(tempRect.getPosition());
         text.push_back(tempText);
@@ -313,6 +320,8 @@ int main() {
     bool prefixSearch = false;
 
     vector<Recipe> currentResults;
+    vector<sf::Text> resultText;
+    vector<sf::RectangleShape> resultRect;
 
     //load recipes from csv
     vector<Recipe> recipes = CSVReader::loadRecipesFromFile("resources/recipes.csv");
@@ -396,7 +405,16 @@ int main() {
 
                 if (searchIcon.getGlobalBounds().contains(mousePos))
                 {
-                    //search
+                    searching = true;
+                    if (usingTrie)
+                    {
+                        searchTrie(t, prefixSearch, query, currentResults, recipes);
+                        recipesToText(currentResults, resultText, resultRect, text);
+                    }
+                    else
+                    {
+                        //search with Hash Map
+                    }
                 }
             }
 
@@ -415,7 +433,15 @@ int main() {
                 //enter runs search
                 else if (textEvent->unicode == 13 || textEvent->unicode == 10)
                 {
-                    continue;
+                    if (usingTrie)
+                    {
+                        searchTrie(t, prefixSearch, query, currentResults, recipes);
+                        recipesToText(currentResults, resultText, resultRect, text);
+                    }
+                    else
+                    {
+                        //search with Hash Map
+                    }
                 }
                 else
                     query+=textEvent->unicode;
@@ -453,8 +479,23 @@ int main() {
         window.draw(structureText2);
 
         //search bar + results
-        window.draw(resultsBar);
-        window.draw(defaultResult);
+        if (query.empty() || !prefixSearch)
+        {
+            window.draw(resultsBar);
+            window.draw(defaultResult);
+        }
+
+        if (!resultText.empty())
+        {
+            for (int i = 0; i < 15; i++)
+            {
+                resultText[i].setFillColor(accent);
+                resultRect[i].setFillColor(backgroundColor);
+                resultRect[i].setOutlineColor(accent);
+                window.draw(resultRect[i]);
+                window.draw(resultText[i]);
+            }
+        }
 
         if (searching)
             bar.setOutlineThickness(3.f);
