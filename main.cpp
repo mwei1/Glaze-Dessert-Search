@@ -95,7 +95,7 @@ int main() {
     //https://pixabay.com/music/france-french-accordion-waltz-paris-atmosphere-477503/
     sf::Music music("resources/audio/Music.mp3");
     music.setLooping(true);
-    //music.play();
+    music.play();
 
     //music mute button
     //https://thenounproject.com/icon/loud-speaker-3452892/
@@ -141,7 +141,6 @@ int main() {
     quirkyDonut.setOrigin(sizeRect.getCenter());
     quirkyDonut.setPosition({0.f + quirkyDonut.getGlobalBounds().size.x / 2.0f, 130.f + quirkyDonut.getGlobalBounds().size.y / 2.0f});
 
-
     //title
     sf::Text titleText(title,"Welcome to Dessert Searcher!", 60);
     titleText.setFillColor(titleColor);
@@ -183,6 +182,31 @@ int main() {
     sizeRect = searchIcon.getLocalBounds();
     searchIcon.setOrigin(sizeRect.getCenter());
     searchIcon.setPosition({880, 200});
+
+    //performance indicators
+    float trieTime = 0.0;
+    float mapTime = 0.0;
+
+    sf::RectangleShape performanceBox({180.f, 120.0f});
+    performanceBox.setOutlineThickness(2);
+    performanceBox.setFillColor(backgroundColor);
+    performanceBox.setOutlineColor(titleColor);
+    performanceBox.setOrigin({90, 0});
+    performanceBox.setPosition({1090, 135});
+
+    sf::Text triePerformance(text, "Last Trie Time:\n   " + to_string(trieTime), 23);
+    triePerformance.setFillColor(accent);
+    triePerformance.setLineSpacing(0.7);
+    sizeRect = triePerformance.getLocalBounds();
+    triePerformance.setOrigin({sizeRect.getCenter().x, 0});
+    triePerformance.setPosition({1090, 137});
+
+    sf::Text mapPerformance(text, "Last Map Time:\n   " + to_string(mapTime), 23);
+    mapPerformance.setFillColor(accent);
+    mapPerformance.setLineSpacing(0.7);
+    sizeRect = mapPerformance.getLocalBounds();
+    mapPerformance.setOrigin({sizeRect.getCenter().x, 0});
+    mapPerformance.setPosition({1090, 195});
 
 
 
@@ -321,6 +345,9 @@ int main() {
         window.draw(searchBar);
         window.draw(searchIcon);
 
+        window.draw(performanceBox);
+        window.draw(triePerformance);
+        window.draw(mapPerformance);
 
         window.draw(quirkyDonut);
 
