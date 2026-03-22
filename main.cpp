@@ -5,10 +5,10 @@
 #include "CSVReader.h"
 #include <vector>
 #include "Trie.h"
-
+#include "HashTable.h"
 
 int main() {
-    std::vector<Recipe> recipes = CSVReader::loadRecipesFromFile("resources/recipes.csv");
+    std::vector<Recipe> recipes = CSVReader::loadRecipesFromFile("../resources/recipes.csv");
     std::cout << recipes.size() << "\n\n";
 
     Trie t;
@@ -35,6 +35,26 @@ int main() {
     }else {
         std::cout << "No recipes found associated with that index.";
     }
+
+    HashTable ht;
+    for (int i = 0; i < recipes.size(); i++) {
+        ht.insert(recipes[i].name, i);
+    }
+    std::vector<int> index = ht.search(testSearchName);
+    if (!index.empty()) {
+        for (int i : index) {
+            std::cout << recipes[i].name <<  " " << std::endl;
+        }
+    }
+    else {
+        std::cout << testSearchName<< " not found." << std::endl;
+    }
+
+    std::cout << ht.getSize() << "\n\n";
+
+    std::string testSearch = "Balsamic Bombe";
+    std::vector<int> testFound = t.search(testSearchName);
+
     return 0;
 }
 

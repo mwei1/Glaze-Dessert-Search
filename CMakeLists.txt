@@ -11,4 +11,7 @@ add_executable(GlazeProject2
         CSVReader.cpp
         Trie.cpp
         Trie.h
+        HashTable.h
+        HashTable.cpp
+        HashTable.h
 )
