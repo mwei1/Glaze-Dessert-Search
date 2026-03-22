@@ -26,6 +26,11 @@ The group, Glaze, built a C++ application that stores and searches through a dat
 1. Open the project in CLion
 2. Ensure the CMake is configured
 3. Click "Run"
+   - Running the Program, the application will:
+       - Load 100,000 recipes from the dataset
+       - Insert data into the Trie and Hash Table
+       - Allow users to search recipes via the interface
+       - Display matching recipes, detailed information, and the execution time
 
 ### Configuring SFML
 1. Install MINGW through MSYS2
